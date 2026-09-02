@@ -1,6 +1,4 @@
-#=========================================================
 # 1. SETUP: CARREGAMENTO DE PACOTES E PREPARAÇÃO DE DADOS -----------------
-#=========================================================
 
 # Carregar pacotes --------------------------------------------------------
 library(shiny)
@@ -30,7 +28,7 @@ df_medias <- df_bruto%>%
     Pais = Country
   )%>%
   #Criar a coluna de Statis de Renda Categórica (usando colunas binárias)
-  #Se o Status for "Developed" (1), é Alta Renda, senão é Baixo/Médio Renda
+  #Se o Status for "Developed", é Alta Renda, senão é Baixo/Médio renda
   mutate(
     Status_Renda_Simples = case_when(
       Economy_status_Developed == 1 ~ "Alta Renda",
@@ -63,22 +61,22 @@ mapa_mundial <- mapa_mundial%>%
   select(sovereignt, geometry)%>%
   rename(Pais_Mapa = sovereignt)
 
-## Juntar os dados de médias (df_medias) com os dados do mapa (mapa_mundial)
+# Juntar os dados de médias (df_medias) com os dados do mapa (mapa_mundial)
 # A chave de união é o nome do país. Isso exige limpeza posterior dos nomes.
 df_mapa <- mapa_mundial%>%
   left_join(df_medias, by = c("Pais_Mapa" = "Pais"))
 
 
-#=========================================================
+
 # 2. INTERFACE DO USUÁRIO (UI) --------------------------------------------
-#=========================================================
+
 
 ui <- fluidPage(
 
-    # Application title
+    # Título
     titlePanel("DashBoard de Expectativa de Vida Global (OMS/Banco Mundial)"),
 
-    # Sidebar with a slider input for number of bins 
+    # Barra lateral com controle para selecionar os intervalos
     sidebarLayout(
       
         sidebarPanel(
@@ -144,20 +142,20 @@ ui <- fluidPage(
     )
 )
 
-# Define server logic required to draw a histogram
+# Lógica do servidor
 server <- function(input, output) {
 
     output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
+        # gerar os intervalos
         x    <- faithful[, 2]
         bins <- seq(min(x), max(x), length.out = input$bins + 1)
 
-        # draw the histogram with the specified number of bins
+        # histograma com os intervalos
         hist(x, breaks = bins, col = 'darkgray', border = 'white',
              xlab = 'Waiting time to next eruption (in mins)',
              main = 'Histogram of waiting times')
     })
 }
 
-# Run the application 
+# Rodar
 shinyApp(ui = ui, server = server)
