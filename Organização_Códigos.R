@@ -5,7 +5,6 @@ library(readr)
 
 df_bruto <- read_csv("Life-Expectancy-Data-Updated.csv")
 View(df_bruto)
-#Estrutura do dataframe
 summary(df_bruto)
 
 
@@ -19,8 +18,8 @@ df_medias <- df_bruto%>%
     Regiao = Region,
     Pais = Country
   )%>%
-  #Criar a coluna de Statis de Renda Categórica (usando colunas binárias)
-  #Se o Status for "Developed" (1), é Alta Renda, senão é Baixo/Médio Renda
+  #Criar a coluna de Statis de Renda Categórica
+  #Se o Status for "Developed", é Alta renda, se não é Baixo/Médio renda - usar condicional
   mutate(
     Status_Renda_Simples = case_when(
       Economy_status_Developed == 1 ~ "Alta Renda",
@@ -40,11 +39,11 @@ df_medias <- df_bruto%>%
     Expectativa_Vida_Media = mean(Expectativa_Vida, na.rm=TRUE),
     Mortalidade_Infantil_Media = mean(Mortalidade_Infantil, na.rm=TRUE),
     Escolaridade_Media = mean(Escolaridade, na.rm=TRUE),
-    .groups = 'drop'
-  )
+    .groups = 'drop' 
+  ) #lembrar: drop remove os agrupamentos
 #Verificando o novo data frame
-print(head(df_medias))
-print(paste("Número de países (obervações médias):", nrow(df_medias)))  
+head(df_medias)
+nrow(df_medias)  #número de observações médias
 
 # Preparação Geográfica para o Mapa ---------------------------------------
 install.packages("rnaturalearth")
@@ -65,11 +64,12 @@ mapa_mundial <- mapa_mundial%>%
   select(sovereignt, geometry)%>%
   rename(Pais_Mapa = sovereignt)
 
-## Juntar os dados de médias (df_medias) com os dados do mapa (mapa_mundial)
-# A chave de união é o nome do país. Isso exige limpeza posterior dos nomes.
+# Juntar os dados de médias (df_medias) com os dados do mapa (mapa_mundial)
+# A chave de união é o nome do país -> primary-key né??
 df_mapa <- mapa_mundial%>%
   left_join(df_medias, by = c("Pais_Mapa" = "Pais"))
 
 #Visualizar a união
 head(df_mapa)
-print(paste("Países que uniram:", sum(!is.na(df_mapa$Expectativa_Vida_Media)), "de", nrow(df_medias)))
+sum(!is.na(df_mapa$Expectativa_Vida_Media))
+nrow(df_medias)
